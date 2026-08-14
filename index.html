@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a2332">
+  <title>记一次 · 健身手账</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css">
+
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <!-- 登录引导 -->
+  <div id="gate" class="gate hidden">
+    <div class="gate-inner">
+      <h1 class="gate-title">记一次</h1>
+      <p class="gate-sub">a fitness journal</p>
+
+      <div id="gate-step-code" class="gate-step">
+        <label>群口令</label>
+        <input id="gate-code" type="text" autocomplete="off" placeholder="向群主要一下">
+        <button id="gate-code-btn">进入</button>
+      </div>
+
+      <div id="gate-step-nickname" class="gate-step hidden">
+        <label>你的名字</label>
+        <input id="gate-nickname" type="text" maxlength="12" placeholder="给自己起一个">
+        <button id="gate-nickname-btn">开始</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主应用 -->
+  <div id="app" class="app hidden">
+
+    <header class="quote-bar">
+      <span id="quote-text">—</span>
+      <span id="quote-source"></span>
+    </header>
+
+    <main>
+
+      <!-- 今日 -->
+      <section id="tab-today" class="tab active">
+        <div class="progress-card">
+          <div class="week-label">this week</div>
+          <div class="week-count">
+            <span id="week-done">0</span><span class="slash"> / </span><span id="week-goal">2</span>
+          </div>
+          <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+          <div id="progress-note" class="progress-note"></div>
+        </div>
+
+        <button id="checkin-btn" class="cta">记一次</button>
+
+        <div class="section-block">
+          <div class="section-title">今日</div>
+          <div id="today-entries" class="entries">
+            <div class="empty">今天还未记。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 手账 -->
+      <section id="tab-journal" class="tab">
+        <div class="section-title">手账</div>
+        <div id="journal-entries" class="entries"></div>
+      </section>
+
+      <!-- 同伴 -->
+      <section id="tab-leaderboard" class="tab">
+        <div class="section-title">同伴</div>
+        <div id="week-nav" class="week-nav"></div>
+        <div id="leaderboard-list" class="leaderboard"></div>
+        <p class="tip">本地原型:仅显示本机数据。在设置中可生成演示同伴。</p>
+      </section>
+
+      <!-- 我 -->
+      <section id="tab-me" class="tab">
+        <div class="section-title">我的</div>
+        <div class="settings">
+          <div class="setting-item">
+            <label>昵称</label>
+            <input id="setting-nickname" type="text" maxlength="12">
+          </div>
+          <div class="setting-item">
+            <label>每周目标</label>
+            <input id="setting-goal" type="number" min="1" max="14">
+            <span class="unit">次</span>
+          </div>
+          <div class="setting-item">
+            <label>本月请假</label>
+            <button id="leave-btn" class="secondary">请假一次</button>
+          </div>
+          <div class="setting-item">
+            <label>照片显示</label>
+            <div class="mode-toggle">
+              <button type="button" data-mode="compact" class="mode-chip">紧凑</button>
+              <button type="button" data-mode="full" class="mode-chip">大图</button>
+            </div>
+          </div>
+          <button id="save-settings" class="cta">保存</button>
+          <div class="link-row">
+            <button id="seed-demo" class="link">生成演示同伴</button>
+            <button id="logout" class="link danger">清空并退出</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <nav class="tabbar">
+      <button data-tab="today" class="tab-btn active"><span>今日</span></button>
+      <button data-tab="journal" class="tab-btn"><span>手账</span></button>
+      <button data-tab="leaderboard" class="tab-btn"><span>同伴</span></button>
+      <button data-tab="me" class="tab-btn"><span>我的</span></button>
+    </nav>
+  </div>
+
+  <!-- 打卡弹窗 -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-inner">
+      <button class="modal-close" id="modal-close" aria-label="关闭">×</button>
+      <h2>记一次</h2>
+      <p class="modal-sub" id="modal-today-date"></p>
+
+      <div class="field">
+        <label>运动项目</label>
+        <div class="chips" id="chips">
+          <button type="button" data-value="练背">练背</button>
+          <button type="button" data-value="练胸">练胸</button>
+          <button type="button" data-value="练腿">练腿</button>
+          <button type="button" data-value="跑步">跑步</button>
+          <button type="button" data-value="瑜伽">瑜伽</button>
+          <button type="button" data-value="游泳">游泳</button>
+          <button type="button" data-value="骑行">骑行</button>
+          <button type="button" data-value="其他">其他</button>
+        </div>
+        <input id="input-exercise-custom" type="text" placeholder="或写点别的" maxlength="20">
+      </div>
+
+      <div class="field">
+        <label>时长</label>
+        <div class="duration-row">
+          <input id="input-duration" type="number" min="30" max="240" step="5" value="60">
+          <span>分钟</span>
+        </div>
+        <div class="hint">≥ 30 分钟</div>
+      </div>
+
+      <div class="field">
+        <label>备注(选填)</label>
+        <textarea id="input-note" maxlength="60" placeholder="例:今天状态不错;卧推增重 5kg"></textarea>
+      </div>
+
+      <div class="field">
+        <label>现场照(选填)</label>
+        <input type="file" id="input-photo" accept="image/*" style="display:none">
+        <div class="photo-picker">
+          <button type="button" id="photo-add-btn" class="photo-add">+ 加张照片</button>
+          <div id="photo-preview" class="photo-preview hidden">
+            <img id="photo-preview-img" alt="预览">
+            <button type="button" id="photo-remove-btn" class="photo-remove" aria-label="移除">×</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="modal-submit" class="cta">提交</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- 同伴详情弹窗 -->
+  <div id="person-modal" class="modal hidden">
+    <div class="modal-inner">
+      <button class="modal-close" id="person-modal-close" aria-label="关闭">×</button>
+      <h2 id="person-modal-name"></h2>
+      <p class="modal-sub" id="person-modal-meta"></p>
+      <div id="person-modal-body" class="entries"></div>
+    </div>
+  </div>
+
+  <div id="photo-viewer" class="photo-viewer hidden">
+    <img id="photo-viewer-img" alt="">
+  </div>
+
+  <!-- Supabase SDK + 项目配置(config.js 里改 URL/KEY/群口令) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
