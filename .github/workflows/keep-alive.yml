@@ -1,0 +1,30 @@
+name: Keep Supabase Awake
+
+# 每 2 天 UTC 03:00（北京时间 11:00）打一次 REST API，
+# 避免 Supabase 免费项目因 7 天无活动被自动 pause。
+# 也可以在 Actions 页面点 "Run workflow" 手动触发测试。
+on:
+  schedule:
+    - cron: '0 3 */2 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: https://hyulrupwapczvssmzoqv.supabase.co
+          SUPABASE_KEY: sb_publishable_sjjp_3i6y2qLgRpja1Zuqw_HSgtldJE
+        run: |
+          STATUS=$(curl -s -o /tmp/body -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/users?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}")
+          echo "HTTP ${STATUS}"
+          echo "Body: $(cat /tmp/body)"
+          if [ "${STATUS}" -lt 200 ] || [ "${STATUS}" -ge 400 ]; then
+            echo "::error::Supabase ping failed (HTTP ${STATUS}) — 项目可能已被 pause，去 Supabase Dashboard restore"
+            exit 1
+          fi
+          echo "Supabase alive."
