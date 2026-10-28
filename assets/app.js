@@ -848,6 +848,8 @@ async function bootFromStorage() {
     state.user = store.loadUser();
     // 老版本可能没存 groupCode,补上
     if (!state.user.groupCode) state.user.groupCode = CFG.groupCode;
+    // 让当前 session 的 CFG.groupCode 跟随用户所在群,避免拉错群数据
+    CFG.groupCode = state.user.groupCode;
     $('#gate').classList.add('hidden');
     $('#app').classList.remove('hidden');
     applyPhotoMode();
@@ -870,13 +872,13 @@ async function bootFromStorage() {
 function bindGate() {
   const submitCode = () => {
     const val = $('#gate-code').value.trim();
-    if (val === CFG.groupCode) {
-      $('#gate-step-code').classList.add('hidden');
-      $('#gate-step-nickname').classList.remove('hidden');
-      setTimeout(() => $('#gate-nickname').focus(), 100);
-    } else {
-      toast('口令不对,再问问群主');
-    }
+    if (!val) { toast('给群起个口令吧'); return; }
+    if (val.length > 32) { toast('口令 32 字以内'); return; }
+    // 任意非空口令都可进:输过的口令会进对应的群(已存在则加入,没有则创建)
+    CFG.groupCode = val;
+    $('#gate-step-code').classList.add('hidden');
+    $('#gate-step-nickname').classList.remove('hidden');
+    setTimeout(() => $('#gate-nickname').focus(), 100);
   };
   const submitNickname = async () => {
     const val = $('#gate-nickname').value.trim();

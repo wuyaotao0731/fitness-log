@@ -106,6 +106,15 @@ button { cursor: pointer; }
   transition: border-color 0.3s;
 }
 .gate-step input:focus { border-bottom-color: var(--teal); }
+.gate-hint {
+  font-family: var(--font-cn-body);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  margin: -22px 0 28px;
+  opacity: 0.75;
+}
 .gate-step button {
   width: 100%;
   padding: 14px;
